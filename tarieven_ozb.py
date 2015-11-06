@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ##############################################################################
 #  Copyright (C) 2015 Ronald Portier <ronald.portier.eu>
 #
@@ -33,12 +34,12 @@ RH_TOT = 'rioolheffing (totaal woningen)'
 OZB_TOT = 'ozb totaal'
 
 # Tarieven 2014 en 2015 van website gemeente en verordeningen (ris)
+# Tarieven 2016 uit de begroting 2016 (p. 72)
 # Opbrengsten 2014 uit de jaarrekening
-# Opbrengsten 2015 uit de begroting
+# Opbrengsten 2015 uit de begroting 2016
+# Opbrengsten 2016 uit de begroting 2016 (p. 71)
 
 # De tarieven voor de ozb zijn percentages. De overige vaste bedragen.
-
-# Tarieven 2014
 tarieven_2014 = {
     OZB_BEW: 0.1280,
     OZB_EIG: 0.2386,
@@ -48,7 +49,6 @@ tarieven_2014 = {
     RH_EIG: 86.73,
 }
 
-# Tarieven 2014
 tarieven_2015 = {
     OZB_BEW: 0.1322,
     OZB_EIG: 0.2506,
@@ -58,6 +58,24 @@ tarieven_2015 = {
     RH_EIG: 90.20,
 }
 
+tarieven_2016 = {
+    OZB_BEW: 0.1301,
+    OZB_EIG: 0.2290,
+    OZB_GEB: 0.1869,
+    AFH_BEW: 269.62,
+    RH_BEW: 81.00,
+    RH_EIG: 90.81,
+}
+
+
+def toevoegen_tot_ozb(opbrengsten):
+    opbrengsten[OZB_TOT] = (
+        opbrengsten[OZB_BEW] +
+        opbrengsten[OZB_EIG] +
+        opbrengsten[OZB_GEB]
+    )
+
+
 # Opbrengsten 2014 (* 1.000,- euro):
 opbrengsten_2014 = {
     OZB_BEW: 11158,
@@ -66,21 +84,28 @@ opbrengsten_2014 = {
     AFH_BEW: 13344,
     RH_TOT: 10477,
 }
+toevoegen_tot_ozb(opbrengsten_2014)
 
 # Opbrengsten 2015 (* 1.000,- euro):
 opbrengsten_2015 = {
-    OZB_TOT: 22641,
+    OZB_BEW: 11080,
+    OZB_EIG: 7227,
+    OZB_GEB: 5054,
     AFH_BEW: 13456,
     RH_TOT:11142,
 }
+toevoegen_tot_ozb(opbrengsten_2015)
 
 
-# Bereken totale OZB opbrengst 2014:
-opbrengsten_2014[OZB_TOT] = (
-    opbrengsten_2014[OZB_BEW] +
-    opbrengsten_2014[OZB_EIG] +
-    opbrengsten_2014[OZB_GEB]
-)
+# Opbrengsten 2016 (* 1.000,- euro):
+opbrengsten_2016 = {
+    OZB_BEW: 11106,
+    OZB_EIG: 6750,
+    OZB_GEB: 4695,
+    AFH_BEW: 14008,
+    RH_TOT: 11238,
+}
+toevoegen_tot_ozb(opbrengsten_2016)
 
 
 def print_opbrengsten(jaar, opbrengsten):
@@ -204,27 +229,28 @@ def get_totaal_opbrengsten(opbrengsten):
 
 
 # Schat afzonderlijke OZB opbrengsten 2015:
-for ozb_onderdeel in [OZB_BEW, OZB_EIG, OZB_GEB]:
-    opbrengsten_2015[ozb_onderdeel] = schat_verdeling(
-        opbrengsten_2015, opbrengsten_2014, OZB_TOT, ozb_onderdeel)
+# Nu niet meer nodig. Handhaaf commented als voorbeeld
+# for ozb_onderdeel in [OZB_BEW, OZB_EIG, OZB_GEB]:
+#     opbrengsten_2015[ozb_onderdeel] = schat_verdeling(
+#         opbrengsten_2015, opbrengsten_2014, OZB_TOT, ozb_onderdeel)
 
-# Print feitelijke opbrengsten 2014:
-print_opbrengsten(2014, opbrengsten_2014)
+# Print feitelijke opbrengsten 2015:
+print_opbrengsten(2015, opbrengsten_2015)
 
-# Vergelijk tarieven 2014 en 2015
+# Vergelijk tarieven 2015 en 2016
 print_scenario(
-    'van 2014 naar 2015', tarieven_2015, tarieven_2014,
-    opbrengsten_2015, opbrengsten_2014
+    'van 2015 naar 2016', tarieven_2016, tarieven_2015,
+    opbrengsten_2016, opbrengsten_2015
 )
 
 # ================= Scenario 01 ========================================= #
 # Scenario 01 AFH en RH worden vervangen door ozb, ozb over alle groepen
 factor_ozb_scenario_01 = round(
     (
-        float(opbrengsten_2015[OZB_TOT] +
-              opbrengsten_2015[AFH_BEW] +
-              opbrengsten_2015[RH_TOT]
-             ) / float(opbrengsten_2015[OZB_TOT])
+        float(opbrengsten_2016[OZB_TOT] +
+              opbrengsten_2016[AFH_BEW] +
+              opbrengsten_2016[RH_TOT]
+             ) / float(opbrengsten_2016[OZB_TOT])
     ), 2
 )
 print (
@@ -238,24 +264,24 @@ tarieven_scenario_01 = {
 }
 for tarief in [OZB_BEW, OZB_EIG, OZB_GEB]:
     tarieven_scenario_01[tarief] = round(
-        (factor_ozb_scenario_01 * tarieven_2015[tarief]),
+        (factor_ozb_scenario_01 * tarieven_2016[tarief]),
         4
     )
 opbrengsten_scenario_01 = bereken_nieuwe_opbrengsten(
-    tarieven_scenario_01, tarieven_2015, opbrengsten_2015
+    tarieven_scenario_01, tarieven_2016, opbrengsten_2016
 )
 print_scenario(
-    'scenario01', tarieven_scenario_01, tarieven_2015,
-    opbrengsten_scenario_01, opbrengsten_2015
+    'scenario01', tarieven_scenario_01, tarieven_2016,
+    opbrengsten_scenario_01, opbrengsten_2016
 )
 
 # ================= Scenario 02 ========================================= #
 # Scenario 02 RH worden vervangen door ozb, ozb over alle groepen
 factor_ozb_scenario_02 = round(
     (
-        float(opbrengsten_2015[OZB_TOT] +
-              opbrengsten_2015[RH_TOT]
-             ) / float(opbrengsten_2015[OZB_TOT])
+        float(opbrengsten_2016[OZB_TOT] +
+              opbrengsten_2016[RH_TOT]
+             ) / float(opbrengsten_2016[OZB_TOT])
     ), 2
 )
 print (
@@ -263,21 +289,21 @@ print (
     " = %.2f" % factor_ozb_scenario_02
 )
 tarieven_scenario_02 = {
-    AFH_BEW: tarieven_2015[AFH_BEW],
+    AFH_BEW: tarieven_2016[AFH_BEW],
     RH_BEW: 0.0,
     RH_EIG: 0.0,
 }
 for tarief in [OZB_BEW, OZB_EIG, OZB_GEB]:
     tarieven_scenario_02[tarief] = round(
-        (factor_ozb_scenario_02 * tarieven_2015[tarief]),
+        (factor_ozb_scenario_02 * tarieven_2016[tarief]),
         4
     )
 opbrengsten_scenario_02 = bereken_nieuwe_opbrengsten(
-    tarieven_scenario_02, tarieven_2015, opbrengsten_2015
+    tarieven_scenario_02, tarieven_2016, opbrengsten_2016
 )
 print_scenario(
-    'scenario 02', tarieven_scenario_02, tarieven_2015,
-    opbrengsten_scenario_02, opbrengsten_2015
+    'scenario 02', tarieven_scenario_02, tarieven_2016,
+    opbrengsten_scenario_02, opbrengsten_2016
 )
 
 # ================= Scenario 03 ========================================= #
@@ -292,30 +318,30 @@ tarieven_scenario_03 = {
 }
 # Bereken opbrengsten eerst uit zonder AFH
 opbrengsten_scenario_03 = bereken_nieuwe_opbrengsten(
-    tarieven_scenario_03, tarieven_2015, opbrengsten_2015
+    tarieven_scenario_03, tarieven_2016, opbrengsten_2016
 )
 # Bereken benodigd tarief AFH uit tekort aan opbrengsten als geen
 # AFH wordt berekend:
-opbrengsten_2015_totaal = get_totaal_opbrengsten(opbrengsten_2015)
-print 'Totaal opbrengsten 2015 %d' % opbrengsten_2015_totaal
+opbrengsten_2016_totaal = get_totaal_opbrengsten(opbrengsten_2016)
+print 'Totaal opbrengsten 2015 %d' % opbrengsten_2016_totaal
 opbrengsten_scenario_03_totaal = get_totaal_opbrengsten(
     opbrengsten_scenario_03)
 print 'Totaal opbrengsten scenario 03 zonder AFH %d' % (
     opbrengsten_scenario_03_totaal)
 opbrengsten_scenario_03[AFH_BEW] = (
-    opbrengsten_2015_totaal - opbrengsten_scenario_03_totaal)
+    opbrengsten_2016_totaal - opbrengsten_scenario_03_totaal)
 opbrengsten_scenario_03_totaal = get_totaal_opbrengsten(
     opbrengsten_scenario_03)
 print 'Totaal opbrengsten scenario 03 met AFH %d' % (
     opbrengsten_scenario_03_totaal)
 tarieven_scenario_03[AFH_BEW] = round(
-    tarieven_2015[AFH_BEW] *
+    tarieven_2016[AFH_BEW] *
     (float(opbrengsten_scenario_03[AFH_BEW]) /
-     float(opbrengsten_2015[AFH_BEW])
+     float(opbrengsten_2016[AFH_BEW])
     ),
     2
 )
 print_scenario(
-    'scenario 03', tarieven_scenario_03, tarieven_2015,
-    opbrengsten_scenario_03, opbrengsten_2015
+    'scenario 03', tarieven_scenario_03, tarieven_2016,
+    opbrengsten_scenario_03, opbrengsten_2016
 )
